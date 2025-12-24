@@ -279,15 +279,19 @@ class CustomGridEnv(gym.Env):
         if self.render_mode is None:
             return
         
+        if self.render_mode == "human" or self.render_mode == "rgb_array":
+            return self._render_frame()
+
+    def _render_frame(self):
         if not self.sprites_loaded:
             self._init_pygame()
         
         self._process_events()
         
-        # Clear screen
+        # 1. Clear screen
         self.window_surface.fill((255, 255, 255))
         
-        # Draw grid
+        # 2. Draw grid and objects
         for r in range(self.grid_rows):
             for c in range(self.grid_cols):
                 pos = (c * self.cell_size, r * self.cell_size)
@@ -298,7 +302,6 @@ class CustomGridEnv(gym.Env):
                 # Draw safe zones
                 if [r, c] in self.safe_zones:
                     self.window_surface.blit(self.safe_zone_img, pos)
-                    # Dim if already visited
                     if tuple([r, c]) in self.visited_safe_zones:
                         dim_overlay = pygame.Surface((self.cell_size, self.cell_size), pygame.SRCALPHA)
                         dim_overlay.fill((0, 0, 0, 100))
@@ -312,27 +315,30 @@ class CustomGridEnv(gym.Env):
                 if np.array_equal([r, c], self.goal_pos):
                     self.window_surface.blit(self.goal_img, pos)
                 
-                # Draw agent (on top of everything)
+                # Draw agent
                 if np.array_equal([r, c], self.agent_pos):
                     self.window_surface.blit(self.agent_img, pos)
         
-        # Draw action and reward text
+        # 3. Draw action and reward text
         text_y = self.window_size[1] - self.action_info_height
-        
-        action_text = self.action_font.render(
-            f'Action: {self.last_action}', 
-            True, (0, 0, 0), (255, 255, 255)
-        )
+        action_text = self.action_font.render(f'Action: {self.last_action}', True, (0, 0, 0))
         self.window_surface.blit(action_text, (10, text_y))
         
         reward_text = self.info_font.render(
             f'Total Reward: {self.total_reward:.1f} | Safe Zones: {len(self.visited_safe_zones)}/{len(self.safe_zones)}', 
-            True, (0, 100, 0), (255, 255, 255)
+            True, (0, 100, 0)
         )
         self.window_surface.blit(reward_text, (10, text_y + self.action_font.get_height() + 5))
-        
-        pygame.display.update()
-        self.clock.tick(self.metadata['render_fps'])
+
+        # 4. Handle Return Modes
+        if self.render_mode == "human":
+            pygame.display.update()
+            self.clock.tick(self.metadata['render_fps'])
+            return None
+        else: # rgb_array
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(self.window_surface)), axes=(1, 0, 2)
+            )
     
     def _process_events(self):
         """Handle pygame events"""

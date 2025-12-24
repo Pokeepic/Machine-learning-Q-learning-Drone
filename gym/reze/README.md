@@ -29,7 +29,7 @@ py train_reze.py
 
     # NUMBER OF EPISODES (you can find this in at the end of code)
     if __name__ == "__main__":
-    q_table = run(NUMBER_OF_EPISODE, render=False)
+        q_table = run(NUMBER_OF_EPISODE, render=False)
 ```
 
 3. To see the training in real time head over to at the end of code in train_reze.py, and set render to True
@@ -44,8 +44,9 @@ if __name__ == "__main__":
 ```bash
 py load_reze.py
 ```
-
 >Note: Run train_reze.py first to generate reze.pkl (the model)
+
+5. Fun fact: You can also save your gif now, yay!
 
 ### Now, you can experience Reze delivered to your house !
 ![INCOMING REZEEEEEEE](sprites/reze_devil_form.png)

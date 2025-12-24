@@ -2,8 +2,9 @@ import gymnasium as gym
 import numpy as np
 import pickle
 import custom_grid_env
+import imageio
 
-def load_and_test_model(model_path="reze.pkl", episodes=10, render=True):
+def load_and_test_model(model_path="reze.pkl", episodes=10, render=True, save_gif=False):
     """
     Load a trained Q-table and test the agent on the custom grid environment
     
@@ -11,6 +12,7 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True):
         model_path: Path to the saved Q-table pickle file
         episodes: Number of episodes to run
         render: Whether to render the environment
+        save_gif: Whether to save as GIF
     """
     
     # Load the Q-table
@@ -26,17 +28,26 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True):
         [' ', ' ', ' ', 'O'],
         ['O', ' ', ' ', 'G']
     ]
+
+    # Choose render mode based on whether we're saving GIF
+    if save_gif:
+        render_mode = 'rgb_array'
+    elif render:
+        render_mode = 'human'
+    else:
+        render_mode = None
     
     # Create environment
     env = gym.make('custom-grid-v0', 
                    grid_layout=grid_layout,
-                   render_mode='human' if render else None,
+                   render_mode=render_mode if render else None,
                    cell_size=80)
     
     unwrapped_env = env.unwrapped
     
     rewards_per_episode = []
     steps_per_episode = []
+    frames = []
     
     print(f"\nRunning {episodes} episodes...\n")
     
@@ -48,13 +59,21 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True):
         truncated = False
         steps = 0
         episode_reward = 0
-        
+
+         # Capture first frame
+        if save_gif:
+            frames.append(env.render())
+
         while (not terminated and not truncated):
             # Use greedy policy (always choose best action)
             action = np.argmax(q[state, :])
             new_obs, reward, terminated, truncated, info = env.step(action)
             new_state = int(new_obs[0] * unwrapped_env.grid_cols + new_obs[1])
-            
+
+            # Capture frame
+            if save_gif:
+                frames.append(env.render())
+
             state = new_state
             episode_reward += reward
             steps += 1
@@ -64,6 +83,12 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True):
         
         status = "SUCCESS" if terminated and episode_reward > 0 else "FAILED"
         print(f"Episode {i+1}: {status} - Steps taken: {steps} - Total Reward: {episode_reward:.2f}")
+
+        # Save GIF
+        if save_gif and frames:
+            print(f"\nSaving GIF with {len(frames)} frames...")
+            imageio.mimsave('gifs/reze_agent.gif', frames, fps=5, loop=0)
+            print("GIF saved as 'reze_agent.gif'")
     
     env.close()
     
@@ -92,4 +117,4 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True):
 
 if __name__ == "__main__":
     # Test the trained model
-    load_and_test_model("reze.pkl", episodes=10, render=True)
+    load_and_test_model("reze.pkl", episodes=10, render=True, save_gif=True)
