@@ -34,10 +34,10 @@ class CustomGridEnv(gym.Env):
     def __init__(self, 
                  grid_layout=None,
                  render_mode=None,
-                 agent_sprite='sprites/reze_devil_form.png',
+                 agent_sprite='sprites/reze_devil_form.png', # change this to robot for presentation woi
                  goal_sprite='sprites/house.png',
                  floor_sprite='sprites/tiles.jpg',
-                 obstacle_sprite='sprites/pedestrian.png',
+                 obstacle_sprite='sprites/makima.png', # change this to pedestrian for presentation woi
                  safe_zone_sprite='sprites/safe.jpg',
                  cell_size=64):
         
