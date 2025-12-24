@@ -48,5 +48,7 @@ py load_reze.py
 
 5. Fun fact: You can also save your gif now, yay!
 
+![INCOMING REZEEEEEEE](gifs/reze_delivery.gif)
+
 ### Now, you can experience Reze delivered to your house !
 ![INCOMING REZEEEEEEE](sprites/reze_devil_form.png)
