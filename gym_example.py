@@ -11,9 +11,11 @@ def run(episodes):
     learning_rate = 0.9 # alpha
     discount_factor = 0.9 # gamma
 
-    epsilon = 1
+    epsilon = 1 # randomness
     epsilon_decay_rate = 0.0001 # 1/0.0001 = 10000
     rng = np.random.default_rng()
+
+    # over time the randomness will decay, for decay rate 0.0001 it will took 10000 episodes to complete decay
 
     rewards_per_episode = np.zeros(episodes)
 
@@ -28,11 +30,11 @@ def run(episodes):
                 action = env.action_space.sample() # actions: {0:left, 1:down, 2:right, 3:up}
             else:
                 action = np.argmax(q[state,:])
-            new_state, reward, terminated, truncated = env.step(action)
+            new_state, reward, terminated, truncated, info = env.step(action)
             
             # Update Q-values
-            q[state, action] = q[state.action] + learning_rate * (
-                reward + discount_factor + np.max(q[new_state])
+            q[state, action] = q[state, action] + learning_rate * (
+                reward + discount_factor * np.max(q[new_state, :]) - q[state, action]
             )
   
             # Update current state
@@ -57,5 +59,6 @@ def run(episodes):
     f = open("frozen_lake_8x8.pkl", "wb")
     pickle.dump(q, f)
     f.close()
+    
 if __name__ == "__main__":
     run(15000)
