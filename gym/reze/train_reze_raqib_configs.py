@@ -103,7 +103,7 @@ def run(episodes, render=False):
     plt.subplot(1, 3, 2)
     plt.plot(sum_rewards)
     plt.xlabel('Episode')
-    plt.ylabel('Average Reward (Last 10 Episodes)')
+    plt.ylabel('Average Reward (Last 100 Episodes)')
     plt.title('Training Progress (Rolling Average)')
     plt.grid(True, alpha=0.3)
     
@@ -115,16 +115,16 @@ def run(episodes, render=False):
         success_rate[t] = np.sum(success_per_episode[max(0, t-100):(t+1)])
     plt.plot(success_rate)
     plt.xlabel('Episode')
-    plt.ylabel('Successes (Last 10 Episodes)')
+    plt.ylabel('Successes (Last 100 Episodes)')
     plt.title('Goal Reach Rate')
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('reze_training.png', dpi=150)
+    plt.savefig('robot_5_episode.png', dpi=150)
     plt.close()
     
     # Save Q-table
-    with open("pkls/robot_5_episode.pkl", "wb") as f:
+    with open("pkls/robot_any_episode.pkl", "wb") as f:
         pickle.dump(q, f)
     
     # Print final statistics
