@@ -3,8 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import custom_grid_env
+from training_plots import plot_training
+from simple_heatmap_anim import save_heatmap_gif
 
-def run(episodes, render=False):
+def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
     # Define your grid layout
     grid_layout = [
         ['S', ' ', 'R', ' '],
@@ -22,6 +24,10 @@ def run(episodes, render=False):
     unwrapped_env = env.unwrapped
     num_states = unwrapped_env.grid_rows * unwrapped_env.grid_cols
     num_actions = env.action_space.n
+
+    # Store Q-tables for animation
+    q_snapshots = []
+    snapshot_episodes = []
     
     q = np.zeros((num_states, num_actions))
 
@@ -75,6 +81,11 @@ def run(episodes, render=False):
 
         # Store episode reward
         rewards_per_episode[i] = episode_reward
+
+        # Save Q-table snapshot for animation
+        if heatmap_gif and (i % gif_interval == 0 or i == episodes - 1):
+            q_snapshots.append(q.copy())
+            snapshot_episodes.append(i + 1)
         
         # Print progress every 1000 episodes
         if (i + 1) % 1000 == 0:
@@ -88,58 +99,34 @@ def run(episodes, render=False):
     for t in range(episodes):
         sum_rewards[t] = np.mean(rewards_per_episode[max(0, t-100):(t+1)])
 
-    # Create plots
-    plt.figure(figsize=(15, 5))
-    
-    # Plot 1: Total reward per episode
-    plt.subplot(1, 3, 1)
-    plt.plot(rewards_per_episode, alpha=0.3)
-    plt.xlabel('Episode')
-    plt.ylabel('Total Reward')
-    plt.title('Reward per Episode')
-    plt.grid(True, alpha=0.3)
-    
-    # Plot 2: Rolling average
-    plt.subplot(1, 3, 2)
-    plt.plot(sum_rewards)
-    plt.xlabel('Episode')
-    plt.ylabel('Average Reward (Last 100 Episodes)')
-    plt.title('Training Progress (Rolling Average)')
-    plt.grid(True, alpha=0.3)
-    
-    # Plot 3: Success rate (for goal reaching)
-    plt.subplot(1, 3, 3)
-    success_per_episode = (rewards_per_episode >= 10).astype(int)  # Goal gives reward of 10
+    success_per_episode = (rewards_per_episode >= 10).astype(int)
     success_rate = np.zeros(episodes)
     for t in range(episodes):
         success_rate[t] = np.sum(success_per_episode[max(0, t-100):(t+1)])
-    plt.plot(success_rate)
-    plt.xlabel('Episode')
-    plt.ylabel('Successes (Last 100 Episodes)')
-    plt.title('Goal Reach Rate')
-    plt.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig('reze_training.png', dpi=150)
-    plt.close()
-    
+
+    heatmap_gif_loc = "gifs/q_learning_heatmap.gif"
+    plot_training_loc = "plots/training_plots.png"
+    model_save_loc = "pkls/reze.pkl"
+
+    plot_training(rewards_per_episode, sum_rewards, success_rate, plot_training_loc)
+
+    # Create animated heatmap GIF
+    if heatmap_gif and len(q_snapshots) > 0:
+        save_heatmap_gif(q_snapshots, snapshot_episodes, unwrapped_env.grid_rows, unwrapped_env.grid_cols, episodes, heatmap_gif_loc)
+
     # Save Q-table
-    with open("reze.pkl", "wb") as f:
+    with open(model_save_loc, "wb") as f:
         pickle.dump(q, f)
-    
-    # Print final statistics
-    print(f"\n{'='*60}")
+
     print(f"TRAINING COMPLETED!")
-    print(f"{'='*60}")
     print(f"Total episodes: {episodes}")
     print(f"Final average reward (last 100): {sum_rewards[-1]:.2f}")
     print(f"Final success rate (last 100): {success_rate[-1]:.0f}%")
     print(f"Best average reward: {np.max(sum_rewards):.2f}")
-    print(f"Q-table saved to: custom_grid.pkl")
-    print(f"Training plot saved to: custom_grid_training.png")
-    print(f"{'='*60}")
+    print(f"Q-table saved to: {model_save_loc}")
+    print(f"Training plot saved to: {plot_training_loc}")
     
     return q
 
 if __name__ == "__main__":
-    q_table = run(15000, render=False)
+    q_table = run(100, render=False, heatmap_gif=True, gif_interval=1,)
