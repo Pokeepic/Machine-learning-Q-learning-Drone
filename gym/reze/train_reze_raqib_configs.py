@@ -7,7 +7,6 @@ from training_plots import plot_training
 from simple_heatmap_anim import save_heatmap_gif
 
 def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
-    # Define your grid layout
     grid_layout = [
         ['S', ' ', 'R', ' '],
         [' ', 'O', ' ', ' '],
@@ -20,31 +19,29 @@ def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
                    render_mode='human' if render else None,
                    cell_size=80)
     
-    # Access unwrapped environment for custom attributes
     unwrapped_env = env.unwrapped
     num_states = unwrapped_env.grid_rows * unwrapped_env.grid_cols
     num_actions = env.action_space.n
 
-    # Store Q-tables for animation
     q_snapshots = []
     snapshot_episodes = []
     
     q = np.zeros((num_states, num_actions))
 
-    learning_rate = 0.9  # alpha
-    discount_factor = 0.9  # gamma
+    # Q-Learning hyperparameters
+    alpha = 0.8  # learning rate
+    gamma = 0.93  # discount factor
 
-    # EPSILON GREEDY POLICY
-    epsilon = 1  # randomness
-    epsilon_decay_rate = 0.0001  # 1/0.0001 = 10000
+    # Epsilon-greedy policy parameters
+    epsilon = 1.0
+    min_epsilon = 0.05
+    decay = 0.01
+
     rng = np.random.default_rng()
-
     rewards_per_episode = np.zeros(episodes)
 
     for i in range(episodes):
-        obs = env.reset()[0]  # Get observation [agent_row, agent_col, goal_row, goal_col]
-        
-        # Convert observation to state
+        obs = env.reset()[0]
         state = int(obs[0] * unwrapped_env.grid_cols + obs[1])
         
         terminated = False
@@ -52,49 +49,39 @@ def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
         episode_reward = 0
 
         while (not terminated and not truncated):
-            # Epsilon-greedy action selection
             if rng.random() < epsilon:
-                action = env.action_space.sample()  # actions: {0:left, 1:down, 2:right, 3:up}
+                action = env.action_space.sample()
             else:
                 action = np.argmax(q[state, :])
 
             new_obs, reward, terminated, truncated, info = env.step(action)
-            
-            # Convert new observation to state
             new_state = int(new_obs[0] * unwrapped_env.grid_cols + new_obs[1])
             
-            # Update Q-values
-            q[state, action] = q[state, action] + learning_rate * (
-                reward + discount_factor * np.max(q[new_state, :]) - q[state, action]
+            q[state, action] = q[state, action] + alpha * (
+                reward + gamma * np.max(q[new_state, :]) - q[state, action]
             )
   
-            # Update current state
             state = new_state
             episode_reward += reward
 
-        # Decay epsilon
-        epsilon = max(epsilon - epsilon_decay_rate, 0)
+        # Exponential decay of epsilon
+        epsilon = max(min_epsilon, epsilon * np.exp(-decay))
 
-        # Reduce learning rate after exploration phase
         if epsilon == 0:
-            learning_rate = 0.0001
+            alpha = 0.0001
 
-        # Store episode reward
         rewards_per_episode[i] = episode_reward
 
-        # Save Q-table snapshot for animation
         if heatmap_gif and (i % gif_interval == 0 or i == episodes - 1):
             q_snapshots.append(q.copy())
             snapshot_episodes.append(i + 1)
         
-        # Print progress every 1000 episodes
         if (i + 1) % 1000 == 0:
             avg_reward = np.mean(rewards_per_episode[max(0, i-99):i+1])
             print(f"Episode {i+1}/{episodes} - Avg Reward (last 100): {avg_reward:.2f} - Epsilon: {epsilon:.4f}")
 
     env.close()
 
-    # Calculate rolling average of rewards
     sum_rewards = np.zeros(episodes)
     for t in range(episodes):
         sum_rewards[t] = np.mean(rewards_per_episode[max(0, t-100):(t+1)])
@@ -104,17 +91,16 @@ def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
     for t in range(episodes):
         success_rate[t] = np.sum(success_per_episode[max(0, t-100):(t+1)])
 
-    heatmap_gif_loc = "gifs/q_learning_heatmap.gif"
-    plot_training_loc = "plots/training_plots.png"
-    model_save_loc = "pkls/reze.pkl"
+    heatmap_gif_loc = "gifs/raqib_heatmap.gif"
+    plot_training_loc = "plots/training_plots_raqib.png"
+    model_save_loc = "pkls/reze_raqib_config.pkl"
 
     plot_training(rewards_per_episode, sum_rewards, success_rate, plot_training_loc)
 
-    # Create animated heatmap GIF
     if heatmap_gif and len(q_snapshots) > 0:
         save_heatmap_gif(q_snapshots, snapshot_episodes, unwrapped_env.grid_rows, unwrapped_env.grid_cols, episodes, heatmap_gif_loc)
 
-    # Save Q-table
+    # Model save
     with open(model_save_loc, "wb") as f:
         pickle.dump(q, f)
 
@@ -129,4 +115,4 @@ def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
     return q
 
 if __name__ == "__main__":
-    q_table = run(100, render=False, heatmap_gif=True, gif_interval=1,)
+    q_table = run(50, render=False, heatmap_gif=True, gif_interval=1)
