@@ -109,10 +109,12 @@ def train_with_visualization(episodes=100, render=True, delay=0.1, model_path=No
 
     env.close()
 
+    save_gif_loc = "gifs/training_process.gif"
+
     # Save GIF
     if save_gif and frames:
         print(f"\nSaving GIF with {len(frames)} frames...")
-        imageio.mimsave(f'pkls/100ep/training_process.gif', frames, fps=5, loop=0)
+        imageio.mimsave(f'{save_gif_loc}', frames, fps=5, loop=0)
         print("GIF saved as 'gifs/training_process.gif'")
     
     print(f"\nTraining completed!")
@@ -122,7 +124,7 @@ if __name__ == "__main__":
     # train_with_visualization(episodes=50, render=True, delay=0.05, save_gif=False)
     
     # OR load existing model and continue training
-    train_with_visualization(episodes=5, render=True, delay=0.05, model_path="pkls/100ep/reze.pkl", save_gif=True)
+    train_with_visualization(episodes=5, render=False, delay=0.05, model_path="pkls/reze_raqib_config.pkl", save_gif=True)
     
     # OR save training as GIF
     # train_with_visualization(episodes=50, render=False, save_gif=True)

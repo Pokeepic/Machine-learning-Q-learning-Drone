@@ -35,7 +35,7 @@ def save_heatmap_gif(snapshots, snapshot_episodes, grid_rows, grid_cols, episode
                     text_color = 'black' if q_grid[i, j] > q_grid.max() * 0.5 else 'white'
                     
                     ax.text(j, i, f'{q_grid[i,j]:.1f}\n{actions[best_action]}', 
-                            ha='center', va='center', color=text_color, fontweight='bold')
+                            ha='center', va='center', color=text_color, fontweight='bold', fontsize=20)
             
             # Add colorbar (remove old one if exists)
             if idx == 0:

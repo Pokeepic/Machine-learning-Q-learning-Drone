@@ -115,4 +115,4 @@ def run(episodes, render=False, heatmap_gif=False, gif_interval=10):
     return q
 
 if __name__ == "__main__":
-    q_table = run(100, render=False, heatmap_gif=True, gif_interval=1)
+    q_table = run(50, render=False, heatmap_gif=True, gif_interval=1)
