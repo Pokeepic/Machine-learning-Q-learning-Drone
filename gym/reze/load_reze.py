@@ -87,7 +87,7 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True, save_gi
         # Save GIF
         if save_gif and frames:
             print(f"\nSaving GIF with {len(frames)} frames...")
-            imageio.mimsave('gifs/reze_agent.gif', frames, fps=5, loop=0)
+            imageio.mimsave('pkls/1ep/learned_path.gif', frames, fps=5, loop=0)
             print("GIF saved as 'reze_agent.gif'")
     
     env.close()
@@ -117,4 +117,4 @@ def load_and_test_model(model_path="reze.pkl", episodes=10, render=True, save_gi
 
 if __name__ == "__main__":
     # Test the trained model
-    load_and_test_model("reze.pkl", episodes=10, render=True, save_gif=True)
+    load_and_test_model("pkls/1ep/reze.pkl", episodes=10, render=True, save_gif=False)
