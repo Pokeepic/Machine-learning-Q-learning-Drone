@@ -153,14 +153,11 @@ def train(map, rewards, params, save_path="qtable.npy"):
 
             nr, nc, reward, done = step_env(grid, r, c, a, rewards)
             
-            # --- START MODIFICATION ---
-            # If landed on Safe Cell (2)
             if grid[nr, nc] == 2:
                 if (nr, nc) in visited_bonuses:
                     reward = 0  # Already visited? No reward (treat as normal floor)
                 else:
                     visited_bonuses.add((nr, nc)) # Mark as visited
-            # --- END MODIFICATION ---
 
             ns = to_state(nr, nc, n_cols)
 
