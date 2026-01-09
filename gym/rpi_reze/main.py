@@ -64,6 +64,7 @@ if __name__ == "__main__":
                     helper.clear_screen()
                     helper.displayASCII("train.txt")
                     agent.train(CURRENT_MAP, CURRENT_REWARDS, HYPERPARAMETERS)
+                    
                 elif prompt == "2":
                     helper.clear_screen()
                     helper.displayASCII("train.txt")
@@ -86,8 +87,3 @@ if __name__ == "__main__":
         else:
             print("why are u like this?")
             break
-
-
-
-
-

@@ -8,7 +8,6 @@ def to_state(r, c, n_cols):
 def find_cell(grid, val):
     return tuple(np.argwhere(grid == val)[0])
 
-
 def step_env(grid, r, c, action, rewards):
     n_rows, n_cols = grid.shape
     nr, nc = r, c
