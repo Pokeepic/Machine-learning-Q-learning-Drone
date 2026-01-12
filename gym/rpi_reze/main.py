@@ -30,6 +30,7 @@ if __name__ == "__main__":
         print("(3): Load Model into Arduino")
         print("(4): Learned Q table")
         print("(5): Manual Control")
+        print("(6): Simulate Train in Real Time")
         print("(q): Exit")
 
         prompt = input("\n: ").lower().strip()
@@ -77,12 +78,22 @@ if __name__ == "__main__":
         elif prompt == "3":
             helper.clear_screen()
             helper.displayASCII("load.txt")
-            
+            if CURRENT_MAP:
+                load.run_mission(list(CURRENT_MAP.values())[0])
+            else:
+                print("\n[!] Error: No map selected. Please 'Build Environment' first.")
             print("This is Load Section")
             buffer = input("Press any to continue...")
 
         elif prompt == "4":
             inspect_table.main()
+
+        elif prompt == "6":
+            helper.clear_screen()
+            print("Simulate Training in Real Time")
+            actions = agent.simulate_training(CURRENT_MAP, CURRENT_REWARDS, HYPERPARAMETERS)
+            load.send_to_arduino(load.commands_from_path(actions))
+            buffer = input("Press any to continue...")
             
         else:
             print("why are u like this?")

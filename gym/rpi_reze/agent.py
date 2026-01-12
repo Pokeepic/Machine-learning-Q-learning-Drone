@@ -179,3 +179,83 @@ def train(map, rewards, params, save_path="qtable.npy"):
     print(f"Training complete. Q-table saved to {save_path}")
 
     return Q, paths, episode_rewards
+
+def simulate_training(map, rewards, params, qtable_path="qtable.npy", epsilon=0.1):
+    """
+    Simulates one training episode using a loaded Q-table.
+    Returns the path taken and robot commands.
+    """
+    if map is None or rewards is None or params is None:
+        print("Please build environment and configs first")
+        return None, None
+    
+    # Load Q-table
+    try:
+        Q = np.load(qtable_path)
+        print(f"Q-table loaded from {qtable_path}")
+    except FileNotFoundError:
+        print(f"Q-table not found at {qtable_path}")
+        return None, None
+    
+    _, grid = next(iter(map.items()))
+    grid = np.array(grid)
+    n_rows, n_cols = grid.shape
+    n_actions = 4
+    
+    start_pos = find_cell(grid, 4)
+    r, c = start_pos
+    
+    path = [(r, c)]
+    actions = []  # Store action directions for command conversion
+    total_reward = 0
+    visited_bonuses = set()
+    done = False
+    
+    print(f"\n{'='*50}")
+    print(f"SIMULATING TRAINING EPISODE (epsilon={epsilon})")
+    print(f"{'='*50}\n")
+    print(f"Starting position: ({r}, {c})")
+    
+    for step in range(params["max_steps"]):
+        s = to_state(r, c, n_cols)
+        
+        # Epsilon-greedy action selection
+        if random.random() > epsilon:
+            a = int(np.argmax(Q[s]))
+            action_type = "exploit"
+        else:
+            a = random.randint(0, n_actions - 1)
+            action_type = "explore"
+        
+        # Take action
+        nr, nc, reward, done = step_env(grid, r, c, a, rewards)
+        
+        # Handle safe cell bonuses (same logic as training)
+        if grid[nr, nc] == 2:
+            if (nr, nc) in visited_bonuses:
+                reward = 0
+            else:
+                visited_bonuses.add((nr, nc))
+        
+        # Print step info
+        action_names = ['Up', 'Right', 'Down', 'Left']
+        print(f"Step {step + 1}: ({r},{c}) -> {action_names[a]} ({action_type}) -> ({nr},{nc}) | Reward: {reward}")
+        
+        # Update state
+        r, c = nr, nc
+        total_reward += reward
+        path.append((r, c))
+        actions.append(a)
+        
+        if done:
+            print(f"\n{'='*20} EPISODE COMPLETE {'='*20}")
+            print(f"Total reward: {total_reward}")
+            print(f"Steps taken: {len(actions)}")
+            break
+    print(actions)
+    buffer = input("Press any to continue...")
+    
+    if not done:
+        print(f"\nMax steps ({params['max_steps']}) reached without completion")
+    
+    return actions

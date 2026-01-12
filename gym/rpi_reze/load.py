@@ -4,7 +4,7 @@ import time
 import maps  # Ensure maps.py is in the same folder
 
 # --- CONFIGURATION ---
-SERIAL_PORT = "/dev/ttyACM0"  # CHANGE THIS to your Arduino port (e.g., /dev/ttyUSB0 for Linux)
+SERIAL_PORT = "/dev/ttyACM0"
 BAUD_RATE = 9600
 Q_FILE = "qtable.npy"
 
@@ -87,19 +87,30 @@ def send_to_arduino(commands):
     print("Mission Complete.")
     ser.close()
 
-if __name__ == "__main__":
-    # Load data
-    Q = np.load(Q_FILE)
-    _, grid_list = next(iter(maps.training_maps.items()))
-    grid = np.array(grid_list)
+def run_mission(map_data):
+    # 1. Load the Q-Table
+    try:
+        Q = np.load(Q_FILE)
+        print("Q-Table loaded successfully.")
+    except FileNotFoundError:
+        print(f"Error: {Q_FILE} not found. Train the model first (Option 2)!")
+        return
 
-    # Process
+    # 2. Use the map passed from main.py
+    if map_data is None:
+        print("Error: No map loaded. Please Build Environment (Option 1) first.")
+        return
+    
+    grid = np.array(map_data)
+
+    # 3. Calculate Path
+    print("Calculating path...")
     path = get_best_path(grid, Q)
     robot_cmds = commands_from_path(path)
     
-    # Execute
+    # 4. Execute
     if robot_cmds:
         print(f"Path found: {robot_cmds}")
         send_to_arduino(robot_cmds)
     else:
-        print("No path found.")
+        print("No path found or Goal unreachable.")
