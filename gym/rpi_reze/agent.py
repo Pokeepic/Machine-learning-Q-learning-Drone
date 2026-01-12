@@ -252,7 +252,7 @@ def simulate_training(map, rewards, params, qtable_path="qtable.npy", epsilon=0.
             print(f"Total reward: {total_reward}")
             print(f"Steps taken: {len(actions)}")
             break
-    print(actions)
+
     buffer = input("Press any to continue...")
     
     if not done:

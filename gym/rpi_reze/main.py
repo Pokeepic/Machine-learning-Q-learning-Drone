@@ -88,13 +88,28 @@ if __name__ == "__main__":
         elif prompt == "4":
             inspect_table.main()
 
+        elif prompt == "5":
+            print("Manual Control Section")
+            buffer = input("Press any to continue...")
+
         elif prompt == "6":
             helper.clear_screen()
+            helper.displayASCII("simulate.txt")
             print("Simulate Training in Real Time")
-            actions = agent.simulate_training(CURRENT_MAP, CURRENT_REWARDS, HYPERPARAMETERS)
-            load.send_to_arduino(load.commands_from_path(actions))
-            buffer = input("Press any to continue...")
-            
+            missing = []
+
+            if helper.check_missing_params(
+                map=CURRENT_MAP,
+                rewards=CURRENT_REWARDS,
+                hyperparameters=HYPERPARAMETERS
+            ):
+                simulation = agent.simulate_training(
+                    CURRENT_MAP,
+                    CURRENT_REWARDS,
+                    HYPERPARAMETERS
+                )
+                load.send_to_arduino(load.commands_from_path(simulation))
+                input("Press any key to continue...")
         else:
             print("why are u like this?")
             break
