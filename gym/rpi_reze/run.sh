@@ -16,10 +16,6 @@ if ! command -v arduino-cli >/dev/null 2>&1; then
     exit 1
 fi
 
-# ---------- Update index ----------
-echo "Updating Arduino core index..."
-arduino-cli core update-index >/dev/null 2>&1
-
 # ---------- Detect board ----------
 echo "Detecting connected Arduino..."
 BOARD_INFO=$(arduino-cli board list | grep -E "ttyACM|ttyUSB" || true)

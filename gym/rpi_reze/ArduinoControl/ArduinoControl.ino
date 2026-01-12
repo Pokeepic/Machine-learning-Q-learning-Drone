@@ -48,14 +48,14 @@ void moveForward() {
   digitalWrite(motor1pin1, HIGH);
   digitalWrite(motor1pin2, LOW);
   // Right Motor Forward
-  digitalWrite(motor2pin1, HIGH);
-  digitalWrite(motor2pin2, LOW);
+  digitalWrite(motor2pin1, LOW);
+  digitalWrite(motor2pin2, HIGH);
 }
 
 void turnLeft() {
   // Left Motor Back
-  digitalWrite(motor1pin1, LOW);
-  digitalWrite(motor1pin2, HIGH);
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
   // Right Motor Forward
   digitalWrite(motor2pin1, HIGH);
   digitalWrite(motor2pin2, LOW);
@@ -63,8 +63,8 @@ void turnLeft() {
 
 void turnRight() {
   // Left Motor Forward
-  digitalWrite(motor1pin1, HIGH);
-  digitalWrite(motor1pin2, LOW);
+  digitalWrite(motor1pin1, LOW);
+  digitalWrite(motor1pin2, HIGH);
   // Right Motor Back
   digitalWrite(motor2pin1, LOW);
   digitalWrite(motor2pin2, HIGH);
